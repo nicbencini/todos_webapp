@@ -15,15 +15,20 @@ def error_for_todo_title(title):
         return None
     
 def get_list_by_id(list_id, lists):
-    todo_list = [list_dict for 
-                 list_dict in lists 
-                 if list_dict['id'] == list_id
-                 ]
+    for lst in lists:
+        if lst['id'] == list_id:
+            return lst
     
-    if len(todo_list) < 1:
-        return None
+    return None
 
-    return todo_list[0]
+
+def get_todo_by_id(todo_id, todo_lst):
+    for todo in todo_lst:
+        if todo['id'] == todo_id:
+            return todo
+    
+    return None
+
 
 def get_list_index_by_id(list_id, lists):
 
