@@ -16,7 +16,11 @@ from todos.utils import (
     error_for_list_title,
     error_for_todo_title, 
     get_list_by_id, 
-    get_todo_by_id
+    get_todo_by_id,
+    todos_remaining,
+    is_list_completed,
+    is_todo_completed,
+    sort_items    
     )
 
 app = Flask(__name__)
@@ -38,7 +42,10 @@ def add_todo_list():
 # Render the list of todo lists
 @app.route("/lists")
 def get_lists():
-    return render_template('lists.html', lists=session['lists'])
+    lists = sort_items(session['lists'], is_list_completed)
+    return render_template('lists.html',
+                           lists=lists,
+                           todos_remaining=todos_remaining)
 
 @app.route("/lists", methods=["POST"])
 def create_list():
@@ -66,7 +73,8 @@ def show_list(list_id):
     if not lst:
         exceptions.NotFound('List not found!') 
     
-    return render_template('list.html', lst=lst )
+    lst['todos'] = sort_items(lst['todos'], is_todo_completed)
+    return render_template('list.html', lst=lst)
 
 @app.route("/lists/<list_id>/todos", methods=["POST"])
 def create_todo(list_id):
@@ -193,11 +201,17 @@ def edit_list_title(list_id):
         flash(error, "error")
         return render_template('edit_list.html', lst=lst)
     
-    lst[title] = title
+    lst['title'] = title
     flash("List title has been updated!", "success")
     session.modified = True
 
-    return render_template('edit_list.html', lst=lst )
+    return redirect(url_for('show_list', list_id=list_id))
+
+@app.context_processor
+def list_utilities_processor():
+    return dict(
+        is_list_completed=is_list_completed,
+    )
 
 
 
